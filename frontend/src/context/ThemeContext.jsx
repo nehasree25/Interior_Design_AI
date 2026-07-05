@@ -4,14 +4,14 @@ const ThemeContext = createContext(null);
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    const stored = localStorage.getItem('arkeo-theme');
+    const stored = localStorage.getItem('roomify-theme');
     if (stored === 'dark' || stored === 'light') return stored;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('arkeo-theme', theme);
+    localStorage.setItem('roomify-theme', theme);
   }, [theme]);
 
   const toggle = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));

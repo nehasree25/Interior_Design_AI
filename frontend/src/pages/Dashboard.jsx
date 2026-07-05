@@ -14,7 +14,7 @@ const TAB_HISTORY = 'history';
 const LogoMark = ({ size = 34 }) => (
   <div style={{
     width: size, height: size, borderRadius: 'var(--r-lg)',
-    background: 'linear-gradient(140deg, var(--accent) 0%, #818CF8 100%)',
+    background: 'linear-gradient(140deg, var(--accent) 0%, #D4922E 100%)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     boxShadow: 'var(--shadow-accent)', flexShrink: 0,
   }}>
@@ -30,7 +30,7 @@ const LogoMark = ({ size = 34 }) => (
 const Avatar = ({ name, size = 28 }) => (
   <div style={{
     width: size, height: size, borderRadius: '50%',
-    background: 'linear-gradient(140deg, var(--accent) 0%, #818CF8 100%)',
+    background: 'linear-gradient(140deg, var(--accent) 0%, #D4922E 100%)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontSize: size * 0.4, fontWeight: 700, color: '#fff',
     flexShrink: 0, userSelect: 'none',
@@ -51,7 +51,7 @@ const Topbar = ({ user, activeTab, setActiveTab, onLogout }) => (
           <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0 }}>
             <LogoMark size={34} />
             <div style={{ lineHeight: 1.25 }}>
-              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>Arkeo</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>Roomify AI</div>
               <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)', fontWeight: 500 }}>AI Interior Studio</div>
             </div>
           </div>

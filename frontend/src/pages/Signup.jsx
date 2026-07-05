@@ -56,7 +56,7 @@ const Signup = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <LogoMark size={30} />
           <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-            Arkeo
+            Roomify AI
           </span>
         </div>
         <ThemeToggle />

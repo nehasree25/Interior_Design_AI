@@ -7,7 +7,7 @@ export const LogoMark = ({ size = 44 }) => (
   <div style={{
     width: size, height: size,
     borderRadius: 'var(--r-lg)',
-    background: 'linear-gradient(140deg, var(--accent) 0%, #818CF8 100%)',
+    background: 'linear-gradient(140deg, var(--accent) 0%, #D4922E 100%)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     boxShadow: 'var(--shadow-accent)',
     flexShrink: 0,
