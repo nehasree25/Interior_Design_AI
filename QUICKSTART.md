@@ -33,8 +33,8 @@ cd backend
 # Install dependencies
 pip install -r requirements.txt
 
-# Configure environment (edit .env file with your PostgreSQL password)
-# The .env file is already created, just update DB_PASSWORD if needed
+# Configure environment (edit .env file with your credentials)
+# Required: DB_PASSWORD, CLOUDINARY credentials, REPLICATE_API_TOKEN
 
 # Run migrations
 python manage.py migrate
@@ -47,6 +47,10 @@ python manage.py runserver
 ```
 
 Backend is now running at `http://localhost:8000` ✅
+
+**Important:** Make sure to configure these environment variables in `backend/.env`:
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` - For image storage
+- `REPLICATE_API_TOKEN` - For AI design generation
 
 ### Step 3: Frontend Setup (2 minutes)
 
@@ -77,13 +81,21 @@ Visit `http://localhost:5173` and you should see the login page!
    - Submit the form
    - You'll be redirected to the dashboard
 
-2. **Test logout:**
+2. **Generate AI Design:**
+   - Click "AI Design Generator" card or navigate to AI Design page
+   - Upload a room image (drag & drop or click to browse)
+   - Enter a design prompt (e.g., "Modern minimalist living room")
+   - Click "Generate AI Design"
+   - Wait for the AI to process (may take 30-60 seconds)
+   - View your generated design!
+
+3. **Compare Designs:**
+   - Click "Show Original" / "Show AI Design" to toggle between images
+   - Download your favorite designs
+
+4. **Test logout:**
    - Click the "Logout" button
    - You'll be redirected to login
-
-3. **Test login:**
-   - Use your credentials to log back in
-   - You'll see the dashboard again
 
 ## 🔧 Troubleshooting
 
@@ -158,24 +170,26 @@ curl -X GET http://localhost:8000/api/auth/profile/ \
 
 ## 🎨 What's Next?
 
-Now that authentication is working, you can:
+Now that authentication and AI design generation are working, you can:
 
 1. **Customize the UI:**
-   - Edit `frontend/src/pages/Dashboard.jsx`
-   - Modify colors in `frontend/tailwind.config.js`
-   - Update styles in `frontend/src/index.css`
+   - Edit `frontend/src/pages/Dashboard.jsx` or `AIDesign.jsx`
+   - Modify colors in `frontend/src/index.css`
+   - Update component styles
 
 2. **Add Features:**
-   - Create new protected pages
-   - Add user profile editing
-   - Implement password reset
-   - Add email verification
+   - Design history page to view all past designs
+   - Favorite/save designs
+   - Share designs with others
+   - Multiple design variations from one image
+   - Style presets and templates
 
-3. **Build AI Features:**
-   - Add image upload for room analysis
-   - Integrate AI design generation
-   - Create design history
-   - Add sharing functionality
+3. **Enhance AI Features:**
+   - Add more prompt suggestions
+   - Room type detection
+   - Style recommendations
+   - Before/after comparisons
+   - Design collections
 
 ## 📚 Learn More
 
