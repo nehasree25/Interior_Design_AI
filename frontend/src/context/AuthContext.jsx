@@ -78,35 +78,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Update profile function
+  // Update profile function — available if needed by future UI
   const updateProfile = async (userData) => {
-    setLoading(true);
     try {
       const result = await authService.updateProfile(userData);
-      
       if (result.success) {
         setUser(result.user);
         return { success: true };
       }
-      
       return { success: false, error: result.error };
     } catch {
       return { success: false, error: 'Update failed' };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Refresh user profile
-  const refreshProfile = async () => {
-    try {
-      const result = await authService.getProfile();
-      
-      if (result.success) {
-        setUser(result.user);
-      }
-    } catch (error) {
-      console.error('Failed to refresh profile:', error);
     }
   };
 
@@ -118,7 +100,6 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateProfile,
-    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

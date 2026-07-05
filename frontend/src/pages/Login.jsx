@@ -3,39 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/useAuth';
 import ThemeToggle from '../components/ThemeToggle';
-
-/* ── Field wrapper ── */
-const Field = ({ label, error, children }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.01em' }}>
-      {label}
-    </label>
-    {children}
-    {error && (
-      <span style={{ fontSize: '0.76rem', color: 'var(--color-error)', fontWeight: 500, marginTop: 2 }}>
-        {error}
-      </span>
-    )}
-  </div>
-);
-
-/* ── Logo mark ── */
-const LogoMark = ({ size = 44 }) => (
-  <div style={{
-    width: size, height: size,
-    borderRadius: 'var(--r-lg)',
-    background: 'linear-gradient(140deg, var(--accent) 0%, #818CF8 100%)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    boxShadow: 'var(--shadow-accent)',
-    flexShrink: 0,
-  }}>
-    <svg width={size * 0.48} height={size * 0.48} viewBox="0 0 24 24" fill="none"
-      stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-      <polyline points="9 22 9 12 15 12 15 22"/>
-    </svg>
-  </div>
-);
+import { LogoMark, Field, SpinnerIcon, AuthTopBar } from '../components/AuthShared';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -54,7 +22,7 @@ const Login = () => {
   const validate = () => {
     const e = {};
     if (!formData.email.trim()) e.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) e.email = 'Invalid email';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) e.email = 'Invalid email address';
     if (!formData.password) e.password = 'Password is required';
     setErrors(e);
     return !Object.keys(e).length;
@@ -70,38 +38,34 @@ const Login = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-page)', position: 'relative' }}>
-
       {/* Ambient glow */}
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
-        background: 'radial-gradient(ellipse 800px 600px at 25% 30%, var(--accent-soft), transparent 65%)' }} />
-
-      {/* Top bar */}
       <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '16px 28px',
-        borderBottom: '1px solid var(--border)',
-        background: 'var(--nav-bg)',
-        backdropFilter: 'blur(18px)',
-      }}>
+        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+        background: 'radial-gradient(ellipse 800px 600px at 25% 30%, var(--accent-soft), transparent 65%)',
+      }} />
+
+      <AuthTopBar>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <LogoMark size={32} />
+          <LogoMark size={30} />
           <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             Arkeo
           </span>
         </div>
         <ThemeToggle />
-      </div>
+      </AuthTopBar>
 
-      {/* Center form */}
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 20px 40px', position: 'relative', zIndex: 1 }}>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '80px 20px 40px',
+        position: 'relative', zIndex: 1,
+      }}>
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{ width: '100%', maxWidth: 420 }}
         >
-          {/* Card */}
           <div style={{
             background: 'var(--bg-elevated)',
             border: '1px solid var(--border)',
@@ -130,12 +94,19 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Error */}
+            {/* API error */}
             {apiError && (
-              <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
-                className="alert alert-error" style={{ marginBottom: 20, fontSize: '0.85rem' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
-                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              <motion.div
+                initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
+                className="alert alert-error"
+                style={{ marginBottom: 20, fontSize: '0.85rem' }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  style={{ flexShrink: 0, marginTop: 1 }}>
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>
                 <span>{apiError}</span>
               </motion.div>
@@ -143,21 +114,26 @@ const Login = () => {
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <Field label="Email address" error={errors.email}>
-                <input type="email" name="email" value={formData.email} onChange={handleChange}
-                  className="input-modern" placeholder="you@company.com"
-                  disabled={loading} autoComplete="email" />
+                <input
+                  type="email" name="email" value={formData.email}
+                  onChange={handleChange} className="input-modern"
+                  placeholder="you@company.com" disabled={loading} autoComplete="email"
+                />
               </Field>
 
               <Field label="Password" error={errors.password}>
-                <input type="password" name="password" value={formData.password} onChange={handleChange}
-                  className="input-modern" placeholder="••••••••"
-                  disabled={loading} autoComplete="current-password" />
+                <input
+                  type="password" name="password" value={formData.password}
+                  onChange={handleChange} className="input-modern"
+                  placeholder="••••••••" disabled={loading} autoComplete="current-password"
+                />
               </Field>
 
               <motion.button
                 type="submit" disabled={loading} className="btn-primary"
                 style={{ width: '100%', marginTop: 4, padding: '11px 20px' }}
-                whileHover={{ y: -1 }} whileTap={{ scale: 0.985 }}>
+                whileHover={{ y: -1 }} whileTap={{ scale: 0.985 }}
+              >
                 {loading ? (
                   <span style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
                     <SpinnerIcon /> Signing in…
@@ -166,7 +142,10 @@ const Login = () => {
               </motion.button>
             </form>
 
-            <div style={{ marginTop: 22, textAlign: 'center', borderTop: '1px solid var(--border)', paddingTop: 20 }}>
+            <div style={{
+              marginTop: 22, textAlign: 'center',
+              borderTop: '1px solid var(--border)', paddingTop: 20,
+            }}>
               <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)' }}>
                 Don&apos;t have an account?{' '}
                 <Link to="/signup" style={{ color: 'var(--text-accent)', fontWeight: 600, textDecoration: 'none' }}>
@@ -176,7 +155,6 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Footer note */}
           <p style={{ textAlign: 'center', marginTop: 20, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
             AI-powered interior design · Powered by Flux Pro
           </p>
@@ -185,13 +163,5 @@ const Login = () => {
     </div>
   );
 };
-
-const SpinnerIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-    style={{ animation: 'spin 0.7s linear infinite' }}>
-    <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round"/>
-  </svg>
-);
 
 export default Login;

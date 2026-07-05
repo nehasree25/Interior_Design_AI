@@ -23,9 +23,12 @@ const DesignCard = ({ design }) => {
   const [genBroken, setGenBroken]       = useState(false);
   const [origBroken, setOrigBroken]     = useState(false);
 
-  const isBroken  = showOriginal ? origBroken : genBroken;
+  const isBroken   = showOriginal ? origBroken : genBroken;
   const currentSrc = showOriginal ? design.original_image : design.generated_image;
-  const onError   = () => showOriginal ? setOrigBroken(true) : setGenBroken(true);
+  const handleError = () => {
+    if (showOriginal) setOrigBroken(true);
+    else setGenBroken(true);
+  };
 
   const date = new Date(design.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   const time = new Date(design.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -60,7 +63,7 @@ const DesignCard = ({ design }) => {
             key={showOriginal ? 'orig' : 'gen'}
             src={currentSrc}
             alt={design.prompt}
-            onError={onError}
+            onError={handleError}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.22 }}

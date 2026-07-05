@@ -69,16 +69,15 @@
   --r-2xl:  24px;
   --r-pill: 9999px;
 
-  /* Legacy aliases (components may use either form) */
+  /* Legacy aliases so older component code still resolves */
   --radius-md:  var(--r-md);
   --radius-lg:  var(--r-lg);
   --radius-xl:  var(--r-xl);
   --radius-2xl: var(--r-2xl);
   --radius-pill: var(--r-pill);
-  --text-tertiary: var(--text-muted);
+  --text-tertiary:  var(--text-muted);
   --status-success: var(--color-success);
   --status-error:   var(--color-error);
-  --bg-interactive: #F0F1F5;
 
   color-scheme: light;
 }
@@ -429,7 +428,10 @@ img, svg, video, canvas { transition: none !important; }
   transition: border-color 0.18s, background 0.18s;
   cursor: pointer;
 }
-.drop-zone:hover { border-color: var(--accent); background: var(--accent-soft); }
+.drop-zone:hover, .drop-zone.dragging {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
 
 /* ── PROGRESS ─────────────────────────────────────────────────────── */
 .progress-track {

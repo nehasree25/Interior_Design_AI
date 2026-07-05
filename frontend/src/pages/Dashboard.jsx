@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/useAuth';
 import ThemeToggle from '../components/ThemeToggle';
@@ -114,17 +114,17 @@ const Dashboard = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError]     = useState('');
 
-  useEffect(() => {
-    if (activeTab === TAB_HISTORY) loadHistory();
-  }, [activeTab]);
-
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     setHistoryLoading(true); setHistoryError('');
     const r = await designService.getDesignHistory();
     setHistory(r.success ? r.data : []);
     if (!r.success) setHistoryError(r.error || 'Failed to load history');
     setHistoryLoading(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === TAB_HISTORY) loadHistory();
+  }, [activeTab, loadHistory]);
 
   const handleDesignGenerated = async (formData) => {
     setGenerating(true); setGenError(''); setGenSuccess(false);

@@ -67,16 +67,12 @@ const UploadRoom = ({ onDesignGenerated }) => {
         <label style={L}>Room photo</label>
         {!preview ? (
           <div
-            className="drop-zone"
+            className={`drop-zone${dragging ? ' dragging' : ''}`}
             onDrop={handleDrop}
             onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onClick={() => fileRef.current?.click()}
-            style={{
-              padding: '28px 20px', textAlign: 'center', cursor: 'pointer',
-              borderColor: dragging ? 'var(--accent)' : undefined,
-              background: dragging ? 'var(--accent-soft)' : undefined,
-            }}
+            style={{ padding: '28px 20px', textAlign: 'center', cursor: 'pointer' }}
           >
             <div style={{
               width: 38, height: 38, borderRadius: 'var(--r-md)', margin: '0 auto 10px',
