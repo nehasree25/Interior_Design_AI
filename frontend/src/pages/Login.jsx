@@ -1,194 +1,197 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/useAuth';
+import ThemeToggle from '../components/ThemeToggle';
+
+/* ── Field wrapper ── */
+const Field = ({ label, error, children }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.01em' }}>
+      {label}
+    </label>
+    {children}
+    {error && (
+      <span style={{ fontSize: '0.76rem', color: 'var(--color-error)', fontWeight: 500, marginTop: 2 }}>
+        {error}
+      </span>
+    )}
+  </div>
+);
+
+/* ── Logo mark ── */
+const LogoMark = ({ size = 44 }) => (
+  <div style={{
+    width: size, height: size,
+    borderRadius: 'var(--r-lg)',
+    background: 'linear-gradient(140deg, var(--accent) 0%, #818CF8 100%)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    boxShadow: 'var(--shadow-accent)',
+    flexShrink: 0,
+  }}>
+    <svg width={size * 0.48} height={size * 0.48} viewBox="0 0 24 24" fill="none"
+      stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  </div>
+);
 
 const Login = () => {
   const navigate = useNavigate();
   const { login, loading } = useAuth();
-  
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-  
-  const [errors, setErrors] = useState({});
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [errors, setErrors]     = useState({});
   const [apiError, setApiError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    
-    // Clear errors when user types
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: '',
-      }));
-    }
+    setFormData(p => ({ ...p, [name]: value }));
+    if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
     if (apiError) setApiError('');
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
-    
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const validate = () => {
+    const e = {};
+    if (!formData.email.trim()) e.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) e.email = 'Invalid email';
+    if (!formData.password) e.password = 'Password is required';
+    setErrors(e);
+    return !Object.keys(e).length;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setApiError('');
-    
-    if (!validateForm()) return;
-    
+    if (!validate()) return;
     const result = await login(formData);
-    
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      setApiError(result.error || 'Login failed. Please try again.');
-    }
+    if (result.success) navigate('/');
+    else setApiError(result.error || 'Sign in failed. Please try again.');
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        {/* Logo/Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 mb-4">
-            <svg
-              className="w-8 h-8 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-              />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            Welcome Back
-          </h1>
-          <p className="text-gray-400 mt-2">Sign in to your account</p>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-page)', position: 'relative' }}>
+
+      {/* Ambient glow */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+        background: 'radial-gradient(ellipse 800px 600px at 25% 30%, var(--accent-soft), transparent 65%)' }} />
+
+      {/* Top bar */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '16px 28px',
+        borderBottom: '1px solid var(--border)',
+        background: 'var(--nav-bg)',
+        backdropFilter: 'blur(18px)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <LogoMark size={32} />
+          <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            Arkeo
+          </span>
         </div>
+        <ThemeToggle />
+      </div>
 
-        {/* Error Message */}
-        {apiError && (
-          <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
-            {apiError}
-          </div>
-        )}
+      {/* Center form */}
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 20px 40px', position: 'relative', zIndex: 1 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          style={{ width: '100%', maxWidth: 420 }}
+        >
+          {/* Card */}
+          <div style={{
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--r-2xl)',
+            padding: '36px 32px',
+            boxShadow: 'var(--shadow-lg)',
+            position: 'relative',
+          }}>
+            {/* Top accent line */}
+            <div style={{
+              position: 'absolute', top: 0, left: '15%', right: '15%', height: '1px',
+              background: 'linear-gradient(90deg, transparent, var(--accent), transparent)',
+              opacity: 0.6,
+            }} />
 
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email Field */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`input-field ${errors.email ? 'border-red-500 focus:ring-red-500' : ''}`}
-              placeholder="you@example.com"
-              disabled={loading}
-            />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-400">{errors.email}</p>
-            )}
-          </div>
+            {/* Brand */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+              <LogoMark size={48} />
+              <div style={{ textAlign: 'center' }}>
+                <h1 style={{ fontSize: '1.45rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
+                  Welcome back
+                </h1>
+                <p style={{ marginTop: 5, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                  Sign in to Arkeo Studio
+                </p>
+              </div>
+            </div>
 
-          {/* Password Field */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={`input-field ${errors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
-              placeholder="••••••••"
-              disabled={loading}
-            />
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-400">{errors.password}</p>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 px-4 gradient-button text-white font-semibold rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <span className="flex items-center justify-center">
-                <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
+            {/* Error */}
+            {apiError && (
+              <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
+                className="alert alert-error" style={{ marginBottom: 20, fontSize: '0.85rem' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>
-                Signing in...
-              </span>
-            ) : (
-              'Sign In'
+                <span>{apiError}</span>
+              </motion.div>
             )}
-          </button>
-        </form>
 
-        {/* Sign Up Link */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-400">
-            Don't have an account?{' '}
-            <Link
-              to="/signup"
-              className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
-            >
-              Sign up
-            </Link>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <Field label="Email address" error={errors.email}>
+                <input type="email" name="email" value={formData.email} onChange={handleChange}
+                  className="input-modern" placeholder="you@company.com"
+                  disabled={loading} autoComplete="email" />
+              </Field>
+
+              <Field label="Password" error={errors.password}>
+                <input type="password" name="password" value={formData.password} onChange={handleChange}
+                  className="input-modern" placeholder="••••••••"
+                  disabled={loading} autoComplete="current-password" />
+              </Field>
+
+              <motion.button
+                type="submit" disabled={loading} className="btn-primary"
+                style={{ width: '100%', marginTop: 4, padding: '11px 20px' }}
+                whileHover={{ y: -1 }} whileTap={{ scale: 0.985 }}>
+                {loading ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+                    <SpinnerIcon /> Signing in…
+                  </span>
+                ) : 'Sign in'}
+              </motion.button>
+            </form>
+
+            <div style={{ marginTop: 22, textAlign: 'center', borderTop: '1px solid var(--border)', paddingTop: 20 }}>
+              <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)' }}>
+                Don&apos;t have an account?{' '}
+                <Link to="/signup" style={{ color: 'var(--text-accent)', fontWeight: 600, textDecoration: 'none' }}>
+                  Create account
+                </Link>
+              </p>
+            </div>
+          </div>
+
+          {/* Footer note */}
+          <p style={{ textAlign: 'center', marginTop: 20, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+            AI-powered interior design · Powered by Flux Pro
           </p>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
 };
+
+const SpinnerIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+    style={{ animation: 'spin 0.7s linear infinite' }}>
+    <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round"/>
+  </svg>
+);
 
 export default Login;

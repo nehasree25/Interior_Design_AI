@@ -1,94 +1,57 @@
 import { useState, useRef } from 'react';
-import Loader from './Loader';
+import { motion } from 'framer-motion';
+
+const ROOM_TYPES = ['Living Room','Bedroom','Kitchen','Dining Room','Bathroom','Home Office','Studio'];
+const STYLES     = ['Minimalist','Scandinavian','Modern Luxury','Contemporary','Industrial','Coastal','Japandi'];
+const BUDGETS    = ['Standard','Premium','Luxury'];
+const PROMPTS    = [
+  'Bright Scandinavian living room, oak furniture, warm linen',
+  'Moody industrial bedroom, exposed brick, Edison bulbs',
+  'Minimal Japanese study, shoji screens, natural light',
+  'Coastal kitchen, white shaker cabinets, brass hardware',
+  'Luxury master bath, freestanding tub, marble walls',
+];
+
+const L = { fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: 6 };
 
 const UploadRoom = ({ onDesignGenerated }) => {
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [prompt, setPrompt] = useState('');
+  const [image, setImage]     = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [prompt, setPrompt]   = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const fileInputRef = useRef(null);
+  const [error, setError]     = useState('');
+  const [dragging, setDragging] = useState(false);
+  const [roomType, setRoomType] = useState(ROOM_TYPES[0]);
+  const [style, setStyle]     = useState(STYLES[0]);
+  const [budget, setBudget]   = useState(BUDGETS[0]);
+  const fileRef = useRef(null);
 
-  const handleImageSelect = (e) => {
-    const file = e.target.files[0];
-    
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setError('Please select a valid image file');
-        return;
-      }
-
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        setError('Image size should be less than 10MB');
-        return;
-      }
-
-      setSelectedImage(file);
-      setError('');
-
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+  const processFile = (file) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { setError('Please select a JPG, PNG or WebP image.'); return; }
+    if (file.size > 10 * 1024 * 1024)   { setError('Image must be under 10 MB.'); return; }
+    setImage(file); setError('');
+    const reader = new FileReader();
+    reader.onloadend = () => setPreview(reader.result);
+    reader.readAsDataURL(file);
   };
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    
-    if (file && file.type.startsWith('image/')) {
-      const fakeEvent = { target: { files: [file] } };
-      handleImageSelect(fakeEvent);
-    }
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  const handleRemoveImage = () => {
-    setSelectedImage(null);
-    setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
+  const handleDrop  = (e) => { e.preventDefault(); setDragging(false); processFile(e.dataTransfer.files[0]); };
+  const handleSelect = (e) => processFile(e.target.files[0]);
+  const removeImage = () => { setImage(null); setPreview(null); if (fileRef.current) fileRef.current.value = ''; };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!selectedImage) {
-      setError('Please select an image');
-      return;
-    }
-
-    if (!prompt.trim()) {
-      setError('Please enter a design prompt');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    const formData = new FormData();
-    formData.append('image', selectedImage);
-    formData.append('prompt', prompt.trim());
-
+    if (!image)        { setError('Please upload a room photo.'); return; }
+    if (!prompt.trim()) { setError('Please enter a design prompt.'); return; }
+    setLoading(true); setError('');
+    const fd = new FormData();
+    fd.append('image', image);
+    fd.append('prompt', `${prompt.trim()}\n\nRoom: ${roomType} · Style: ${style} · Budget: ${budget}`);
     try {
-      await onDesignGenerated(formData);
-      
-      // Reset form on success
-      setSelectedImage(null);
-      setImagePreview(null);
-      setPrompt('');
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      await onDesignGenerated(fd);
+      setImage(null); setPreview(null); setPrompt('');
+      if (fileRef.current) fileRef.current.value = '';
     } catch (err) {
       setError(err.message || 'Failed to generate design');
     } finally {
@@ -96,147 +59,140 @@ const UploadRoom = ({ onDesignGenerated }) => {
     }
   };
 
-  const promptSuggestions = [
-    'Modern minimalist living room with natural light',
-    'Cozy bedroom with warm colors and soft textures',
-    'Contemporary kitchen with marble countertops',
-    'Scandinavian style dining room',
-    'Industrial loft with exposed brick walls',
-  ];
-
   return (
-    <div className="glass-effect rounded-2xl p-6 md:p-8">
-      <h2 className="text-2xl font-bold text-white mb-6">Generate AI Design</h2>
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Image Upload Area */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-3">
-            Upload Room Image
-          </label>
-          
-          {!imagePreview ? (
-            <div
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-gray-600 rounded-xl p-8 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200 bg-gray-800/50"
-            >
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400 mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
+      {/* Drop zone */}
+      <div>
+        <label style={L}>Room photo</label>
+        {!preview ? (
+          <div
+            className="drop-zone"
+            onDrop={handleDrop}
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onClick={() => fileRef.current?.click()}
+            style={{
+              padding: '28px 20px', textAlign: 'center', cursor: 'pointer',
+              borderColor: dragging ? 'var(--accent)' : undefined,
+              background: dragging ? 'var(--accent-soft)' : undefined,
+            }}
+          >
+            <div style={{
+              width: 38, height: 38, borderRadius: 'var(--r-md)', margin: '0 auto 10px',
+              border: '1px solid var(--border)', background: 'var(--bg-elevated)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)',
+            }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
-              <p className="text-gray-300 mb-2">
-                <span className="font-semibold text-blue-400">Click to upload</span> or drag and drop
-              </p>
-              <p className="text-gray-500 text-sm">PNG, JPG, JPEG up to 10MB</p>
             </div>
-          ) : (
-            <div className="relative rounded-xl overflow-hidden">
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="w-full h-64 object-cover"
-              />
-              <button
-                type="button"
-                onClick={handleRemoveImage}
-                className="absolute top-3 right-3 p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-          )}
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleImageSelect}
-            className="hidden"
-          />
-        </div>
-
-        {/* Prompt Input */}
-        <div>
-          <label htmlFor="prompt" className="block text-sm font-medium text-gray-300 mb-3">
-            Design Prompt
-          </label>
-          <textarea
-            id="prompt"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe the interior design style you want..."
-            rows={4}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-            disabled={loading}
-          />
-          
-          {/* Prompt Suggestions */}
-          <div className="mt-3">
-            <p className="text-xs text-gray-400 mb-2">Suggestions:</p>
-            <div className="flex flex-wrap gap-2">
-              {promptSuggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => setPrompt(suggestion)}
-                  className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded-full transition-colors duration-200"
-                  disabled={loading}
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
+            <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 3 }}>
+              Drag &amp; drop or click to browse
+            </p>
+            <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>PNG, JPG, WebP · max 10 MB</p>
           </div>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
-            {error}
+        ) : (
+          <div style={{ position: 'relative', borderRadius: 'var(--r-xl)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <img src={preview} alt="Preview" style={{ width: '100%', height: 190, objectFit: 'cover', display: 'block' }} />
+            <button type="button" onClick={removeImage} style={{
+              position: 'absolute', top: 8, right: 8, padding: '4px 10px', fontSize: '0.75rem', fontWeight: 600,
+              background: 'rgba(0,0,0,0.58)', color: '#fff', border: '1px solid rgba(255,255,255,0.14)',
+              borderRadius: 'var(--r-md)', cursor: 'pointer', backdropFilter: 'blur(8px)',
+            }}>
+              Remove
+            </button>
           </div>
         )}
+        <input ref={fileRef} type="file" accept="image/*" onChange={handleSelect} style={{ display: 'none' }} />
+      </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={loading || !selectedImage || !prompt.trim()}
-          className="w-full py-3 px-4 gradient-button text-white font-semibold rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-        >
-          {loading ? (
-            <span className="flex items-center justify-center">
-              <Loader message="" />
-              <span className="ml-2">Generating Design...</span>
-            </span>
-          ) : (
-            'Generate AI Design'
-          )}
-        </button>
-      </form>
-    </div>
+      {/* Selectors */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 9 }}>
+        {[
+          { label: 'Room type', value: roomType, set: setRoomType, opts: ROOM_TYPES },
+          { label: 'Style',     value: style,    set: setStyle,    opts: STYLES },
+          { label: 'Budget',    value: budget,   set: setBudget,   opts: BUDGETS },
+        ].map(({ label, value, set, opts }) => (
+          <div key={label}>
+            <label style={L}>{label}</label>
+            <select value={value} onChange={e => set(e.target.value)} disabled={loading}
+              className="input-modern"
+              style={{ padding: '8px 10px', fontSize: '0.83rem', cursor: 'pointer' }}>
+              {opts.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </div>
+        ))}
+      </div>
+
+      {/* Prompt */}
+      <div>
+        <label htmlFor="prompt" style={L}>Design prompt</label>
+        <textarea id="prompt" value={prompt} onChange={e => setPrompt(e.target.value)}
+          className="textarea-modern" disabled={loading} rows={3}
+          placeholder="Describe materials, palette, lighting, mood…" />
+        {/* Quick suggestions */}
+        <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {PROMPTS.map((s, i) => (
+            <motion.button key={i} type="button" disabled={loading}
+              onClick={() => setPrompt(s)} whileHover={{ y: -1 }}
+              style={{
+                padding: '3px 9px', fontSize: '0.73rem', fontWeight: 500,
+                background: 'var(--bg-interactive)', color: 'var(--text-secondary)',
+                border: '1px solid var(--border)', borderRadius: 'var(--r-pill)',
+                cursor: 'pointer', transition: 'all 0.14s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--text-accent)'; e.currentTarget.style.background = 'var(--accent-soft)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'var(--bg-interactive)'; }}>
+              {s.length > 42 ? s.slice(0, 40) + '…' : s}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="alert alert-error" style={{ fontSize: '0.82rem', padding: '10px 13px' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Submit */}
+      <motion.button
+        type="submit"
+        disabled={loading || !image || !prompt.trim()}
+        className="btn-primary"
+        style={{ width: '100%', padding: '11px 20px', fontSize: '0.92rem' }}
+        whileHover={{ y: -1 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        {loading ? (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+            <SpinnerSmall /> Generating…
+          </span>
+        ) : (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            Generate Design
+          </span>
+        )}
+      </motion.button>
+    </form>
   );
 };
+
+const SpinnerSmall = () => (
+  <div style={{ width: 15, height: 15, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff',
+    borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}>
+    <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+  </div>
+);
 
 export default UploadRoom;

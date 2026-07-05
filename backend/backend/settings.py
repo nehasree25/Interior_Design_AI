@@ -40,18 +40,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Third-party apps
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    
+
     # Local apps
     'authentication',
-    # "rest_framework",
-    # "corsheaders",
-    "ai_design",
+    'ai_design',
 ]
 
 MIDDLEWARE = [

@@ -1,23 +1,21 @@
-const Loader = ({ message = 'Loading...' }) => {
-  return (
-    <div className="flex flex-col items-center justify-center p-8">
-      <div className="relative">
-        {/* Outer spinning ring */}
-        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-        
-        {/* Inner pulsing circle */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full animate-pulse"></div>
-        </div>
-      </div>
-      
-      {message && (
-        <p className="mt-4 text-gray-400 text-sm font-medium animate-pulse">
-          {message}
-        </p>
-      )}
+const Loader = ({ message = 'Loading…' }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 13, padding: '16px 0' }}>
+    <div style={{ position: 'relative', width: 38, height: 38 }}>
+      <div style={{
+        position: 'absolute', inset: 0,
+        border: '2.5px solid var(--border-mid)',
+        borderTopColor: 'var(--accent)',
+        borderRadius: '50%',
+        animation: 'loader-spin 0.65s linear infinite',
+      }} />
+      <style>{`@keyframes loader-spin { to { transform: rotate(360deg); } }`}</style>
     </div>
-  );
-};
+    {message && (
+      <p style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.4 }}>
+        {message}
+      </p>
+    )}
+  </div>
+);
 
 export default Loader;

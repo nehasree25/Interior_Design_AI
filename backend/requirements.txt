@@ -7,21 +7,16 @@ djangorestframework-simplejwt==5.3.1
 # Database
 psycopg[binary]>=3.1.0
 
-# AI/ML - No version pins (let pip find compatible versions)
-torch
-torchvision
-transformers
-diffusers
-accelerate
-pillow
-bitsandbytes
+# AI/ML
+replicate==1.0.4
 
 # Cloud Storage
 cloudinary==1.36.0
 
 # Utilities
-python-dotenv==1.0.1
+python-decouple==3.8
 requests==2.32.3
+Pillow==11.2.1
 
 # Production
 gunicorn==22.0.0
