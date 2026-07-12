@@ -318,14 +318,5 @@ This authentication module provides the foundation for your AI Interior Design S
 - Axios 1.7.9
 - Tailwind CSS 4.1.0
 
-## 📄 License
 
-This project is open source and available under the MIT License.
 
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-## 👨‍💻 Author
-
-Built with ❤️ for the AI Interior Design Platform
